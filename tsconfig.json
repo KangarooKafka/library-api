@@ -1,0 +1,13 @@
+{
+  "extends": "@tsconfig/node17/tsconfig.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "CommonJS",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": false
+  },
+  "include": ["src/**/*", "logger/**/*", "config/**/*"],
+  "exclude": ["node_modules", "build"]
+}
