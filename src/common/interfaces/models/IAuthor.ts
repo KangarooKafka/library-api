@@ -4,4 +4,5 @@ import { Document, Types} from 'mongoose';
 export default interface IAuthor extends Document {
     firstName: string;
     lastName: string;
+    books?: [Types.ObjectId];
 }
