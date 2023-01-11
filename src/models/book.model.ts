@@ -12,6 +12,12 @@ const bookSchema: Schema = new Schema<IBook>({
         ref: 'Author',
         require: true
     },
+    stock: {
+        type: Number
+    },
+    available: {
+        type: Number
+    },
     fiction: {
         type: Boolean
     },
