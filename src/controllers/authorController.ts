@@ -28,7 +28,6 @@ class AuthorController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
@@ -38,7 +37,6 @@ class AuthorController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -53,37 +51,25 @@ class AuthorController {
             // Get author object
             const author: Document | null = await Author.findById(new Types.ObjectId(ctx.params.id));
 
-            // If author is found
-            if(!_.isNil(author)){
-                // Response to client
-                ctx.body = author;
-                ctx.status = 200;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
             // If author is not found
-            else {
-                // Response to client
-                ctx.body = {message: "Author not found"}
-                ctx.status = 404;
+            if (_.isNil(author)) ctx.throw(404, 'Author not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.body = author;
+            ctx.status = 200;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -99,36 +85,24 @@ class AuthorController {
             const authors = await Author.find({});
 
             // If no authors are found
-            if(!_.isEmpty(authors)){
-                // Response to client
-                ctx.body = authors;
-                ctx.status = 200;
+            if (_.isEmpty(authors)) ctx.throw(404, 'No authors found')
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // If at least one author is found
-            else {
-                // Response to client
-                ctx.body = {message: "No authors found"}
-                ctx.status = 404;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e : any) {
             // Response to client
-            ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.body = authors;
+            ctx.status = 200;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e : any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -143,6 +117,9 @@ class AuthorController {
             // Find and update author
             const author: Document | null = await Author.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
 
+            // If author not found
+            if (_.isNil(author)) ctx.throw(404, 'Author not found')
+
             // Response to client
             ctx.body = {message: "Success"};
             ctx.status = 202;
@@ -150,17 +127,15 @@ class AuthorController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
             ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.status = e.status;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -175,6 +150,9 @@ class AuthorController {
             // Find and delete author
             const author: Document | null = await Author.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
+            // If author not found
+            if (_.isNil(author)) ctx.throw(404, 'Author not found')
+
             // Response to client
             ctx.body = author;
             ctx.status = 202;
@@ -182,17 +160,15 @@ class AuthorController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
             ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.status = e.status;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
