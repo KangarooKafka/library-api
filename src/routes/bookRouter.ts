@@ -1,6 +1,7 @@
 import KoaRouter from "koa-router";
 import bookController from "../controllers/bookController";
 import bookCheckout from "../middleware/bookCheckout";
+import bookAuthorConnections from "../middleware/bookAuthorConnections";
 
 // Set up router
 const bookRouter: KoaRouter = new KoaRouter();
@@ -13,7 +14,8 @@ const baseRoute: string = '/book';
 // POST route to create new book
 bookRouter.post('add-book',
     baseRoute,
-    bookController.addBook
+    bookController.addBook,
+    bookAuthorConnections.addBookToAuthor
 );
 
 // POST route to check out a book
@@ -51,7 +53,8 @@ bookRouter.put('update-book',
 // DELETE route for deleting a book
 bookRouter.delete('delete-book',
     `${baseRoute}/:id`,
-    bookController.deleteBook
+    bookController.deleteBook,
+    bookAuthorConnections.removeBookFromAuthor
 );
 
 // Export router
