@@ -23,6 +23,12 @@ class BookController {
             // Create new bok entry
             const book: Document = await new Book(ctx.request.body).save();
 
+            // Create object for use by other middleware
+            ctx.state = {
+                bookId : book.id,
+                authorId : ctx.request.body.author
+            }
+
             // Response to client
             ctx.body = book;
             ctx.status = 201;
@@ -30,7 +36,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
@@ -40,7 +45,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // CLear req/res queue
             await next();
         }
     }
@@ -55,37 +59,25 @@ class BookController {
             // Get book object
             const book: Document | null = await Book.findById(new Types.ObjectId(ctx.params.id));
 
-            // If book is found
-            if(!_.isNil(book)){
-                // Response to client
-                ctx.body = book;
-                ctx.status = 200;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
             // If book is not found
-            else {
-                // Response to client
-                ctx.body = {message: "Book not found"}
-                ctx.status = 404;
+            if (_.isNil(book)) ctx.throw(404, 'Book not found')
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.body = book;
+            ctx.status = 200;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -100,6 +92,9 @@ class BookController {
             // Get books
             const books = await Book.find({});
 
+            // If no books found
+            if (_.isEmpty(books)) ctx.throw(404, 'No books found');
+
             // Response to client
             ctx.body = books;
             ctx.status = 200;
@@ -107,17 +102,15 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
             ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.status = e.status;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -132,37 +125,25 @@ class BookController {
             // Find and update book
             const book: Document | null = await Book.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
 
-            // If book is found
-            if(!_.isNil(book)){
-                // Response to client
-                ctx.body = {message: "Success"};
-                ctx.status = 202;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
             // If book is not found
-            else {
-                // Response to client
-                ctx.body = {message: "Book not found"};
-                ctx.status = 404;
+            if (_.isNil(book)) ctx.throw(404, 'Book not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = {message : e.message};
-            ctx.status = 500;
+            ctx.body = {message: "Success"};
+            ctx.status = 202;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -177,37 +158,31 @@ class BookController {
             // Find and delete book
             const book: Document | null = await Book.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
-            // If book was found
-            if(!_.isNil(book)){
-                // Response to client
-                ctx.body = {message: "Success"}
-                ctx.status = 202;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
             // If book was not found
-            else {
-                // Response to client
-                ctx.body = {message: "Book not found"};
-                ctx.status = 404;
+            if (_.isNil(book)) ctx.throw(404, 'Book not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            // Create variable object for use by other middleware
+            ctx.state = {
+                bookId : book.id,
+                authorId : book.toObject().author
             }
 
-            // Clear req/res queue
+            // Response to client
+            ctx.body = {message: "Success"}
+            ctx.status = 202;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         } catch (e: any) {
             // Response to client
             ctx.body = {message : e.message};
-            ctx.status = 500
+            ctx.status = e.status;
 
             // Log response
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -225,6 +200,7 @@ class BookController {
 
             // Safety check to make sure book and customer are not null
             if (_.isNil(book) || _.isNil(customer)) ctx.throw(404, 'Book or customer not found')
+
             // Decrement book value
             book.available--;
             book.save();
@@ -240,7 +216,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`)
 
-            // Clear req/res queue
             await next();
         } catch(e: any){
             // Response to client
@@ -250,7 +225,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -293,7 +267,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
@@ -303,7 +276,6 @@ class BookController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next()
         }
     }
