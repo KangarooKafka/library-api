@@ -40,17 +40,15 @@ class ManagerController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch (e: any) {
             // Response to client
-            ctx.body = e.message;
+            ctx.body = {message : e.message};
             ctx.status = 500;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear res/req queue
             await next();
         }
     }
@@ -65,34 +63,22 @@ class ManagerController {
             // Get manager object
             const manager: Document | null = await Manager.findById(new Types.ObjectId(ctx.params.id));
 
-            // If manager is found
-            if(!_.isNil(manager)){
-                // Response to client
-                ctx.body = manager;
-                ctx.status = 200;
+            // If manager not found
+            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
+            // Response to client
+            ctx.body = manager;
+            ctx.status = 200;
 
-            // If manager is not found
-            else {
-                // Response to client
-                ctx.body = {message : "Manager not found"};
-                ctx.status = 404;
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
             await next();
         } catch(e : any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -102,42 +88,30 @@ class ManagerController {
      * @param {RouterContext} ctx The request object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async getAllManagers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async searchManagers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Get managers
-            const managers = await Manager.find({});
+            const managers = await Manager.find(ctx.query);
 
-            // If at least one manager is found
-            if(!_.isEmpty(managers)){
-                // Response to client
-                ctx.body = managers;
-                ctx.status = 200;
+            // If no managers found
+            if (_.isEmpty(managers)) ctx.throw(404, 'No managers found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // If no managers are found
-            else {
-                // Response to client
-                ctx.body = {message : "No managers found"};
-                ctx.status = 404;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch (e: any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = managers;
+            ctx.status = 200;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch (e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -152,37 +126,25 @@ class ManagerController {
             // Find and update manager
             const manager: Document | null = await Manager.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
 
-            // If manager was found
-            if (!_.isNil(manager)) {
-                // Response to client
-                ctx.body = {message: "Success"};
-                ctx.status = 202;
+            // If manager not found
+            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // If manager was not found
-            else {
-                // Response to client
-                ctx.body = {message: "Manager not found"};
-                ctx.status = 404;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e : any){
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message: "Success"};
+            ctx.status = 202;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // CLear req/res queue
+            await next();
+        } catch(e : any){
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -197,36 +159,24 @@ class ManagerController {
             // Find and delete manager
             const manager: Document | null = await Manager.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
-            // If manager found
-            if(!_.isNil(manager)){
-                // Response to client
-                ctx.body = {message: "Success"};
-                ctx.status = 202;
+            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // If manager was not found
-            else {
-                // Response to client
-                ctx.body = {message: "Manager not found"};
-                ctx.status = 404;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-            // Clear req/res queue
-            await next();
-        } catch(e: any){
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message: "Success"};
+            ctx.status = 202;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any){
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
