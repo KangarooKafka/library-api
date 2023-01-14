@@ -2,9 +2,9 @@ import { RouterContext } from "koa-router";
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import pinoLogger from "../../logger/logger";
-import Manager from '../models/manager.model'
+import Employee from '../models/employee.model'
 import { compare } from 'bcrypt';
-import IManager from "../common/interfaces/models/IManager";
+import IEmployee from "../common/interfaces/models/IEmployee";
 import {Document, Types} from "mongoose";
 
 // Logger
@@ -14,9 +14,9 @@ const logger = pinoLogger();
 const secret = process.env.JWT_SECRET || 'jwt-secret';
 
 /**
- * Controller for Manager-based endpoints and logic
+ * Controller for Employee-based endpoints and logic
  */
-class ManagerController {
+class employeeController {
     /**
      * Logs in a user and gives them a token
      * @param {RouterContext} ctx The request object containing the username and password.
@@ -53,17 +53,17 @@ class ManagerController {
     }
 
     /**
-     * Adds a new manager
-     * @param {RouterContext} ctx The request object containing the new manager info.
+     * Adds a new Employee
+     * @param {RouterContext} ctx The request object containing the new Employee info.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async addManager(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async addEmployee(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Create new manager entry
-            const manager: Document = await new Manager(ctx.request.body).save();
+            // Create new Employee entry
+            const employee: Document = await new Employee(ctx.request.body).save();
 
             // Response to client
-            ctx.body = manager;
+            ctx.body = employee;
             ctx.status = 201;
 
             // Log results
@@ -83,20 +83,20 @@ class ManagerController {
     }
 
     /**
-     * Returns a single manager
-     * @param {RouterContext} ctx The request object containing the manager being requested.
+     * Returns a single employee
+     * @param {RouterContext} ctx The request object containing the Employee being requested.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async getManager(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async getEmployee(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try{
-            // Get manager object
-            const manager: Document | null = await Manager.findById(new Types.ObjectId(ctx.params.id));
+            // Get employee object
+            const employee: Document | null = await Employee.findById(new Types.ObjectId(ctx.params.id));
 
-            // If manager not found
-            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
+            // If employee not found
+            if (_.isNil(employee)) ctx.throw(404, 'Employee not found');
 
             // Response to client
-            ctx.body = manager;
+            ctx.body = employee;
             ctx.status = 200;
 
             // Log results
@@ -113,20 +113,20 @@ class ManagerController {
     }
 
     /**
-     * Returns all managers
+     * Returns all Employees
      * @param {RouterContext} ctx The request object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async searchManagers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async searchEmployees(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Get managers
-            const managers = await Manager.find(ctx.query);
+            // Get employees
+            const employees = await Employee.find(ctx.query);
 
-            // If no managers found
-            if (_.isEmpty(managers)) ctx.throw(404, 'No managers found');
+            // If no employees found
+            if (_.isEmpty(employees)) ctx.throw(404, 'No employees found');
 
             // Response to client
-            ctx.body = managers;
+            ctx.body = employees;
             ctx.status = 200;
 
             // Log results
@@ -146,17 +146,17 @@ class ManagerController {
     }
 
     /**
-     * Updates manager fields
-     * @param {RouterContext} ctx The request object containing the manager to be updated and the new info.
+     * Updates Employee fields
+     * @param {RouterContext} ctx The request object containing the Employee to be updated and the new info.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async updateManager(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async updateEmployee(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Find and update manager
-            const manager: Document | null = await Manager.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
+            // Find and update Employee
+            const employee: Document | null = await Employee.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
 
-            // If manager not found
-            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
+            // If Employee not found
+            if (_.isNil(employee)) ctx.throw(404, 'Employee not found');
 
             // Response to client
             ctx.body = {message: "Success"};
@@ -179,16 +179,16 @@ class ManagerController {
     }
 
     /**
-     * Deletes a manager
+     * Deletes a Employee
      * @param {RouterContext} ctx The request object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async deleteManager(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async deleteEmployee(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Find and delete manager
-            const manager: Document | null = await Manager.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
+            // Find and delete Employee
+            const employee: Document | null = await Employee.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
-            if (_.isNil(manager)) ctx.throw(404, 'Manager not found');
+            if (_.isNil(employee)) ctx.throw(404, 'Employee not found');
 
             // Response to client
             ctx.body = {message: "Success"};
@@ -213,4 +213,4 @@ class ManagerController {
 }
 
 // Export controller
-export default new ManagerController();
+export default new employeeController();
