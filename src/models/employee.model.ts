@@ -1,10 +1,10 @@
 import { model, Schema } from 'mongoose';
-import IManager from '../common/interfaces/models/IManager'
+import IEmployee from '../common/interfaces/models/IEmployee'
 import bcrypt from 'bcrypt';
 const SALT = process.env.SALTFACTOR;
 
-// Schema for manager
-const managerSchema: Schema = new Schema<IManager>({
+// Schema for Employee
+const employeeSchema: Schema = new Schema<IEmployee>({
     username: {
         type: String,
         required: true,
@@ -25,7 +25,7 @@ const managerSchema: Schema = new Schema<IManager>({
 });
 
 // Method for hashing passwords before saving
-managerSchema.pre('save', function(next){
+employeeSchema.pre('save', function(next){
     const user = this;
 
     // Only hash the password if it is modified or new
@@ -44,4 +44,4 @@ managerSchema.pre('save', function(next){
 });
 
 // Create and export model
-export default model<IManager>('Manager', managerSchema);
+export default model<IEmployee>('Employee', employeeSchema);
