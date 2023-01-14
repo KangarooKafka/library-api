@@ -10,6 +10,9 @@ import {Document, Types} from "mongoose";
 // Logger
 const logger = pinoLogger();
 
+// Get secret from env or set a new one
+const secret = process.env.JWT_SECRET || 'jwt-secret';
+
 /**
  * Controller for Manager-based endpoints and logic
  */
@@ -20,7 +23,33 @@ class ManagerController {
      * @param {() => Promise<void>} next The next client request.
      */
     public async login(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+        try {
+            // Create response object
+            const returnObject = {
+                // User info
+                user: ctx.state,
 
+                // Token, expires in one hour
+                token: jwt.sign({
+                    userId: ctx.state.id,
+                    exp:Math.floor(Date.now() / 1000) + 3600
+                }, secret )
+            };
+
+            // Response to client
+            ctx.body = returnObject;
+            ctx.status = 200;
+
+        } catch(e:any) {
+            // Response to client
+            ctx.body = {message: e.message}
+            ctx.status = 500;
+
+            // Log results
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
+
+            await next();
+        }
     }
 
     /**

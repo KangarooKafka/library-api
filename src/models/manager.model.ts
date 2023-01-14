@@ -1,11 +1,11 @@
 import { model, Schema } from 'mongoose';
 import IManager from '../common/interfaces/models/IManager'
 import bcrypt from 'bcrypt';
-const SALT = 10;
+const SALT = process.env.SALTFACTOR;
 
 // Schema for manager
 const managerSchema: Schema = new Schema<IManager>({
-    userName: {
+    username: {
         type: String,
         required: true,
         unique: true
@@ -33,7 +33,7 @@ managerSchema.pre('save', function(next){
 
     // Hash password
     bcrypt
-        .genSalt(SALT)
+        .genSalt(Number(SALT))
         .then((salt: any) => {
             return bcrypt.hash(user.password, salt);
         })
