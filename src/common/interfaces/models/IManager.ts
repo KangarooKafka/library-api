@@ -2,7 +2,7 @@ import { Document, Types} from 'mongoose';
 
 // Interface for the Manager model
 export default interface IManager extends Document {
-    userName: string;
+    username: string;
     password: string;
     firstName: string;
     lastName: string;

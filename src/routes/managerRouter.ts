@@ -1,5 +1,6 @@
 import KoaRouter from "koa-router";
 import managerController from "../controllers/managerController";
+import authorization from "../middleware/authorization";
 
 // Set up router
 const managerRouter: KoaRouter = new KoaRouter();
@@ -8,6 +9,13 @@ const managerRouter: KoaRouter = new KoaRouter();
 const baseRoute: string = '/manager';
 
 /* ROUTES */
+
+// POST route for logging in
+managerRouter.post('login',
+    `${baseRoute}/login`,
+    authorization.checkCredentials,
+    managerController.login
+);
 
 // POST route for adding a new manager
 managerRouter.post('add-manager',
