@@ -2,6 +2,7 @@ import KoaRouter from "koa-router";
 import bookController from "../controllers/bookController";
 import bookCheckout from "../middleware/bookCheckout";
 import bookAuthorConnections from "../middleware/bookAuthorConnections";
+import authorization from "../middleware/authorization";
 
 // Set up router
 const bookRouter: KoaRouter = new KoaRouter();
@@ -14,6 +15,7 @@ const baseRoute: string = '/book';
 // POST route to create new book
 bookRouter.post('add-book',
     baseRoute,
+    authorization.validateToken,
     bookController.addBook,
     bookAuthorConnections.addBookToAuthor
 );
@@ -38,10 +40,10 @@ bookRouter.get('get-book',
     bookController.getBook
 );
 
-// GET route to get all books
-bookRouter.get('get-all-books',
+// GET route to search books by query or get all books if no queries
+bookRouter.get('search-books',
     baseRoute,
-    bookController.getAllBooks
+    bookController.searchBooks
 );
 
 // PUT route for updating a book

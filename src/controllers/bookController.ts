@@ -87,10 +87,10 @@ class BookController {
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async getAllBooks(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async searchBooks(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Get books
-            const books = await Book.find({});
+            const books = await Book.find(ctx.query);
 
             // If no books found
             if (_.isEmpty(books)) ctx.throw(404, 'No books found');
@@ -277,6 +277,26 @@ class BookController {
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
             await next()
+        }
+    }
+
+    public async searchBook(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+        try {
+            const books = await Book.find(ctx.query);
+
+            ctx.body = books;
+            ctx.status = 200;
+
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
+            await next();
+        } catch(e: any) {
+            ctx.body = {message: e.message}
+            ctx.status = 500;
+
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
+            await next();
         }
     }
 }
