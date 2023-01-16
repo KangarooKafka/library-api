@@ -28,17 +28,15 @@ class CustomerController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch (e: any) {
             // Response to client
-            ctx.body = e.message;
+            ctx.body = {message : e.message};
             ctx.status = 500;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -51,39 +49,27 @@ class CustomerController {
     public async getCustomer(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Get customer object
-            const customer = await Customer.findById(new Types.ObjectId(ctx.params.id));
-
-            // If customer is found
-            if(!_.isNil(customer)){
-                // Response to client
-                ctx.body = customer;
-                ctx.status = 200;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
+            const customer: Document | null = await Customer.findById(new Types.ObjectId(ctx.params.id));
 
             // If customer is not found
-            else {
-                // Response to client
-                ctx.body = {message : "Customer not found"};
-                ctx.status = 404;
+            if (_.isNil(customer)) ctx.throw(404, 'Customer not found')
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = customer;
+            ctx.status = 200;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -93,10 +79,13 @@ class CustomerController {
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async getAllCustomers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async searchCustomers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Get customers
-            const customers = await Customer.find({});
+            const customers = await Customer.find(ctx.query);
+
+            // If no customers were found
+            if (_.isEmpty(customers)) ctx.throw(404, 'No customers found');
 
             // Response to client
             ctx.body = customers;
@@ -105,17 +94,15 @@ class CustomerController {
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`)
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
@@ -127,40 +114,28 @@ class CustomerController {
      */
     public async updateCustomer(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Update customer
+            // Find and update customer
             const customer: Document | null = await Customer.findByIdAndUpdate(new Types.ObjectId(ctx.params.id), ctx.request.body);
 
-            // If customer was found
-            if(!_.isNil(customer)) {
-                // Response to client
-                ctx.body = {message: "Success"};
-                ctx.status = 202;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
             // If customer not found
-            else {
-                // Response to client
-                ctx.body = {message: "Customer not found"};
-                ctx.status = 404;
+            if (_.isEmpty(customer)) ctx.throw(404, 'Customer not found');
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message: "Success"};
+            ctx.status = 202;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
@@ -170,41 +145,30 @@ class CustomerController {
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async deleteCustomers(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async deleteCustomer(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Find and delete customer
-            const customer: Document | null = await Customer.findByIdAndDelete(new Types.ObjectId(ctx.params.id))
+            const customer: Document | null = await Customer.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
-            // If customer was found
-            if(!_.isNil(customer)){
-                // Response to client
-                ctx.body = {message: "Success"};
-                ctx.status = 202;
+            // If customer not found
+            if (_.isNil(customer)) ctx.throw(404, 'Customer not found')
 
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-
-            // If customer is not found
-            else {
-                // Response to client
-                ctx.body = {message: "Customer not found"};
-                ctx.status = 404;
-
-                // Log results
-                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-            }
-            // Clear req/res queue
-            await next();
-        } catch(e: any) {
             // Response to client
-            ctx.body = e.message;
-            ctx.status = 500;
+            ctx.body = {message: "Success"};
+            ctx.status = 202;
 
             // Log results
             logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message : e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
