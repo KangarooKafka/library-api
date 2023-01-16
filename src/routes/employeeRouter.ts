@@ -20,6 +20,7 @@ employeeRouter.post('login',
 // POST route for adding a new employee
 employeeRouter.post('add-employee',
     baseRoute,
+    authorization.validateNewEmployee,
     employeeController.addEmployee
 );
 
