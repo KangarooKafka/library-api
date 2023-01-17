@@ -14,26 +14,23 @@ class AdminController {
      * @param {() => Promise<void>} next The next client request.
      */
     public async healthCheck(ctx: RouterContext, next: () => Promise<void>): Promise<void>{
-        // Try/Catch block to catch database and server errors
         try {
             // Set response
             ctx.body = { serverResp: 'running' };
             ctx.status = 200;
 
             // Log response
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Server running\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         } catch(e: any) {
             // Set response
-            ctx.body = e.message;
+            ctx.body = {message : e.message};
             ctx.status = 500;
 
             // Log response
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
-            // Clear req/res queue
             await next();
         }
     }
