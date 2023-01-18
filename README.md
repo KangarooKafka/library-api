@@ -32,14 +32,17 @@ In addition to basic CRUD functions for the above, the following functionality i
 
 ## Security
 
+
 Security is acheived through the use of JWT tokens. Tokens are obtained with a valid username
 and password through the Login route. All routes but a few (GET author and book routes)
 require tokens to access.
 
 To add a new employee, the client must provide the EMPLOYEE_AUTH, a secret key stored in a
+
 .env file, along with the JWT Secret and the salt factor for pasword hashing.
 
 ## Install
+
 
 * Install yarn
 * In the root folder, create a .env file with the following fields:
