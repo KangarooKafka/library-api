@@ -3,8 +3,6 @@ import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import pinoLogger from "../../logger/logger";
 import Employee from '../models/employee.model'
-import { compare } from 'bcrypt';
-import IEmployee from "../common/interfaces/models/IEmployee";
 import {Document, Types} from "mongoose";
 
 // Logger
@@ -40,6 +38,10 @@ class employeeController {
             ctx.body = returnObject;
             ctx.status = 200;
 
+            // Log results
+            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+
+            await next();
         } catch(e:any) {
             // Response to client
             ctx.body = {message: e.message}
@@ -76,7 +78,7 @@ class employeeController {
             ctx.status = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -108,12 +110,15 @@ class employeeController {
             ctx.body = {message : e.message};
             ctx.status = e.status;
 
+            // Log results
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
+
             await next();
         }
     }
 
     /**
-     * Returns all Employees
+     * Returns employees that match query or returns all if no queries given
      * @param {RouterContext} ctx The request object.
      * @param {() => Promise<void>} next The next client request.
      */
@@ -139,7 +144,7 @@ class employeeController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -160,10 +165,10 @@ class employeeController {
 
             // Response to client
             ctx.body = {message: "Success"};
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e : any){
@@ -172,7 +177,7 @@ class employeeController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -192,10 +197,10 @@ class employeeController {
 
             // Response to client
             ctx.body = {message: "Success"};
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e: any){
@@ -204,7 +209,7 @@ class employeeController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }

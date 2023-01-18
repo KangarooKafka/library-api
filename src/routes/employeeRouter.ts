@@ -27,24 +27,28 @@ employeeRouter.post('add-employee',
 // GET route for getting a single employee
 employeeRouter.get('get-employee',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     employeeController.getEmployee
 );
 
 // GET route to search employees by query or get all employees if no queries
 employeeRouter.get('search-employees',
     baseRoute,
+    authorization.validateToken,
     employeeController.searchEmployees
 );
 
 // PUT route for updating a employee
 employeeRouter.put('update-employee',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     employeeController.updateEmployee
 );
 
 // DELETE route for deleting a employee
 employeeRouter.delete('delete-employee',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     employeeController.deleteEmployee
 );
 
