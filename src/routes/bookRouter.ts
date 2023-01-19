@@ -23,6 +23,7 @@ bookRouter.post('add-book',
 // POST route to check out a book
 bookRouter.post('check-out-book',
     `${baseRoute}/checkout`,
+    authorization.validateToken,
     bookCheckout.bookAvailable,
     bookCheckout.customerStanding,
     bookController.checkoutBook
@@ -31,6 +32,7 @@ bookRouter.post('check-out-book',
 // POST route to return a book
 bookRouter.post('return-book',
     `${baseRoute}/return`,
+    authorization.validateToken,
     bookController.returnBook
 );
 
@@ -49,12 +51,14 @@ bookRouter.get('search-books',
 // PUT route for updating a book
 bookRouter.put('update-book',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     bookController.updateBook
 );
 
 // DELETE route for deleting a book
 bookRouter.delete('delete-book',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     bookController.deleteBook,
     bookAuthorConnections.removeBookFromAuthor
 );
