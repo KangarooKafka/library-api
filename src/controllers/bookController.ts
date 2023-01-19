@@ -20,7 +20,7 @@ class BookController {
      */
     public async addBook(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
-            // Create new bok entry
+            // Create new book entry
             const book: Document = await new Book(ctx.request.body).save();
 
             // Create object for use by other middleware
@@ -43,7 +43,7 @@ class BookController {
             ctx.status = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -76,14 +76,14 @@ class BookController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
     }
 
     /**
-     * Returns all books
+     * Returns books that match query or returns all if no queries given
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
@@ -109,7 +109,7 @@ class BookController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -130,10 +130,10 @@ class BookController {
 
             // Response to client
             ctx.body = {message: "Success"};
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e: any) {
@@ -142,7 +142,7 @@ class BookController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -169,10 +169,10 @@ class BookController {
 
             // Response to client
             ctx.body = {message: "Success"}
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch (e: any) {
@@ -181,7 +181,7 @@ class BookController {
             ctx.status = e.status;
 
             // Log response
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -214,7 +214,7 @@ class BookController {
             ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`)
+            logger.info(`Body: Success\nStatus: ${ctx.status}`)
 
             await next();
         } catch(e: any){
@@ -223,7 +223,7 @@ class BookController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -244,7 +244,7 @@ class BookController {
             const book = await Book.findById(ctx.request.body.book);
 
             // If customer or book are not found
-            if (_.isNil(book) || _.isNil(customer)) ctx.throw(400, 'Book not found');
+            if (_.isNil(book) || _.isNil(customer)) ctx.throw(404, 'Book not found');
 
             // Get index of book in customer's book list
             const index = customer.booksCheckedOut.indexOf(ctx.request.body.book, 0);
@@ -265,7 +265,7 @@ class BookController {
             ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e: any) {
@@ -274,29 +274,9 @@ class BookController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next()
-        }
-    }
-
-    public async searchBook(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
-        try {
-            const books = await Book.find(ctx.query);
-
-            ctx.body = books;
-            ctx.status = 200;
-
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-
-            await next();
-        } catch(e: any) {
-            ctx.body = {message: e.message}
-            ctx.status = 500;
-
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
-
-            await next();
         }
     }
 }
