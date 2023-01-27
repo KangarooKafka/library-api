@@ -35,7 +35,7 @@ class CustomerController {
             ctx.status = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -68,14 +68,14 @@ class CustomerController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
     }
 
     /**
-     * Returns all customers
+     * Returns customers that match query or returns all if no queries given
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
@@ -101,7 +101,7 @@ class CustomerController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -122,10 +122,10 @@ class CustomerController {
 
             // Response to client
             ctx.body = {message: "Success"};
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e: any) {
@@ -134,7 +134,7 @@ class CustomerController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -148,17 +148,32 @@ class CustomerController {
     public async deleteCustomer(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Find and delete customer
-            const customer: Document | null = await Customer.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
+            const customer = await Customer.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
             // If customer not found
             if (_.isNil(customer)) ctx.throw(404, 'Customer not found')
 
-            // Response to client
-            ctx.body = {message: "Success"};
-            ctx.status = 202;
+            // If there are no books in the customer's book list
+            if (_.isEmpty(customer.booksCheckedOut)) {
+                // Response to client
+                ctx.body = {message: 'Success'};
+                ctx.status = 200;
 
-            // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+                // Log results
+                logger.info(`Body: Success\nStatus: ${ctx.status}`);
+            }
+
+            // If the customer has books checked out
+            else {
+                // Response to client
+                ctx.body = {message: 'Success. The following books are currently checked out by this customer',
+                    bookList: `${customer.booksCheckedOut}`}
+                ctx.status = 202;
+
+                // Log results
+                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`)
+            }
+
 
             await next();
         } catch(e: any) {
@@ -167,7 +182,7 @@ class CustomerController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
