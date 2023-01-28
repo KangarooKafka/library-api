@@ -35,7 +35,7 @@ class AuthorController {
             ctx.status = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -68,21 +68,21 @@ class AuthorController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
     }
 
     /**
-     * Returns all authors
+     * Returns authors that match query or returns all if no queries given
      * @param {RouterContext} ctx The request context object.
      * @param {() => Promise<void>} next The next client request.
      */
-    public async getAllAuthors(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+    public async searchAuthors(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Get authors
-            const authors = await Author.find({});
+            const authors = await Author.find(ctx.query);
 
             // If no authors are found
             if (_.isEmpty(authors)) ctx.throw(404, 'No authors found')
@@ -101,7 +101,7 @@ class AuthorController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -122,10 +122,10 @@ class AuthorController {
 
             // Response to client
             ctx.body = {message: "Success"};
-            ctx.status = 202;
+            ctx.status = 200;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: Success\nStatus: ${ctx.status}`);
 
             await next();
         } catch(e: any) {
@@ -134,7 +134,7 @@ class AuthorController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -148,17 +148,31 @@ class AuthorController {
     public async deleteAuthor(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Find and delete author
-            const author: Document | null = await Author.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
+            const author = await Author.findByIdAndDelete(new Types.ObjectId(ctx.params.id));
 
             // If author not found
             if (_.isNil(author)) ctx.throw(404, 'Author not found')
 
-            // Response to client
-            ctx.body = author;
-            ctx.status = 202;
+            // If there are no books referencing this author, the delete was clean
+            if (_.isEmpty(author.books)) {
+                // Response to client
+                ctx.body = {message: 'Success'};
+                ctx.status = 200;
 
-            // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+                // Log results
+                logger.info(`Body: Success\nStatus: ${ctx.status}`);
+            }
+
+            // If the author has books referencing it
+            else {
+                // Response to client
+                ctx.body = {message: 'Success. The following books reference this author and need to be updated',
+                    bookList: `${author.books}`}
+                ctx.status = 202;
+
+                // Log results
+                logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`)
+            }
 
             await next();
         } catch(e: any) {
@@ -167,7 +181,7 @@ class AuthorController {
             ctx.status = e.status;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }

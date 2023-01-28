@@ -1,5 +1,6 @@
 import KoaRouter from "koa-router";
 import authorController from "../controllers/authorController";
+import authorization from "../middleware/authorization";
 
 // Set up router
 const authorRouter: KoaRouter = new KoaRouter();
@@ -12,6 +13,7 @@ const baseRoute: string = '/author';
 // POST route to create new author
 authorRouter.post('add-author',
     baseRoute,
+    authorization.validateToken,
     authorController.addAuthor
 );
 
@@ -30,12 +32,14 @@ authorRouter.get('search-authors',
 // PUT route to update an author by ID
 authorRouter.put('update-author',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     authorController.updateAuthors
 );
 
 // DELETE route to delete an author
 authorRouter.delete('delete-author',
     `${baseRoute}/:id`,
+    authorization.validateToken,
     authorController.deleteAuthor
 );
 
