@@ -10,6 +10,7 @@ const logger = pinoLogger();
 
 // Set JWT Secret
 const secret = process.env.JWT_SECRET || 'jwt-secret';
+const employeeAuth = process.env.EMPLOYEE_AUTH || 'default-auth';
 
 class authorization {
     /**
@@ -24,7 +25,7 @@ class authorization {
             const providedPassword = ctx.request.body.password;
 
             // If either username or passwords were not provided
-            if (!providedPassword || !providedUsername) ctx.throw(422, 'Missing username or password')
+            if (!providedPassword || !providedUsername) ctx.throw(400, 'Missing username or password')
 
             // Find user
             const user = await Employee.findOne({'username' : providedUsername});
@@ -57,14 +58,20 @@ class authorization {
         }
     }
 
+    /**
+     * Checks if client's bearer token is valid
+     * @param {RouterContext} ctx Router object containing the token
+     * @param {() => Promise<void>} next The next middleware of endpoint
+     */
     public async validateToken(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
         try {
             // Check if user has a token
-            if (!ctx.headers.authorization) ctx.throw(403, "Access forbidden");
+            if (!ctx.headers.authorization) ctx.throw(400, "Access token required");
 
             // Get user token and separate from 'bearer '
             const token = ctx.headers.authorization.split(' ')[1]
 
+            // Verify token is valid
             try {
                 await verify(token, secret);
             } catch(e: any) {
@@ -82,6 +89,40 @@ class authorization {
             logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
         }
     }
+
+    /**
+     * Checks if a new employee has the correct authorization code and does not already exist
+     * @param {RouterContext} ctx Router object containing the new employee info
+     * @param {() => Promise<void>} next The next middleware of endpoint
+     */
+    public async validateNewEmployee(ctx: RouterContext, next: () => Promise<void>): Promise<void> {
+        try {
+            // Check if client has authorization password
+            if (!ctx.request.body.authorization) ctx.throw(400, "Authorization needed to add employee.");
+
+            // Get new employee authorization from client
+            const clientAuth = ctx.request.body.authorization;
+
+            // Check if client auth matches
+            if (clientAuth !== employeeAuth) ctx.throw(403, "Authorization needed to add employee.");
+
+            // See if a user already has requested username
+            const existingUser = await Employee.findOne({"username" : ctx.request.body.username});
+
+            // If there is an existing user already
+            if (!_.isNil(existingUser)) ctx.throw(400, "Username already exists.")
+
+            await next();
+        } catch(e: any) {
+            // Response to client
+            ctx.body = {message: e.message};
+            ctx.status = e.status;
+
+            // Log results
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
+        }
+    }
+
 }
 
 export default new authorization;
