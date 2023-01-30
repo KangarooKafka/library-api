@@ -22,12 +22,12 @@ class bookAuthorConnections {
             // Get author object
             const author = await Author.findById(new Types.ObjectId(authorId));
 
-            // Safety if author object is valid
-            if (author && author.books) {
-                // Add book to author's book list
-                author.books.push(bookId);
-                author.save();
-            }
+            // Add author not valid
+            if (!author || !author.books) ctx.throw(202, 'Book added, but not connected to valid author')
+
+            // Add book to author's book list
+            author.books.push(bookId);
+            author.save();
 
             await next();
         } catch (e: any) {
@@ -36,7 +36,7 @@ class bookAuthorConnections {
             ctx.state = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
 
             await next();
         }
@@ -77,7 +77,9 @@ class bookAuthorConnections {
             ctx.status = 500;
 
             // Log results
-            logger.info(`Body: ${ctx.body}\nStatus: ${ctx.status}`);
+            logger.info(`Body: ${e.message}\nStatus: ${ctx.status}`);
+
+            await next();
         }
     }
 }
