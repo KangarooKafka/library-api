@@ -13,4 +13,5 @@ export default interface IMongooseOptions {
     authSource?: string;
     serverSelectionTimeout?: number;
     heartBestFrequencyMS?: number;
+    strictQuery?: boolean;
 }
