@@ -19,9 +19,10 @@ import * as process from "process";
 async function dbConnect(): Promise<void> {
     // Set config and options
     const mongoConnect: IMongoConnect = config.get('mongo');
+    mongoose.set('strictQuery', false);
     const options: IMongooseOptions = {
         autoIndex: true,
-        family: 4
+        family: 4,
     };
 
     // Instantiate logger
