@@ -4,11 +4,20 @@ import * as KoaRouter from 'koa-router';
 import koaBody from 'koa-body';
 import config from 'config';
 import { Logger } from 'pino';
+import * as dotenv from 'dotenv';
+
+// Set up environment variables
+dotenv.config();
 
 // Database
 import dbConnect from './db/dbConnect';
 
 // Routes
+import adminRouter from "./routes/adminRouter";
+import authorRouter from "./routes/authorRouter";
+import bookRouter from "./routes/bookRouter";
+import customerRouter from "./routes/customerRouter";
+import employeeRouter from "./routes/employeeRouter";
 
 // Logger
 import pinoLogger from "../logger/logger";
@@ -36,6 +45,13 @@ const router: KoaRouter = new Router();
 app.use(cors());
 app.use(koaPinoLogger());
 app.use(koaBody({multipart: true}));
+app.use(router.routes())
+    .use(adminRouter.routes())
+    .use(authorRouter.routes())
+    .use(bookRouter.routes())
+    .use(customerRouter.routes())
+    .use(employeeRouter.routes())
+
 
 
 /* PORT LISTENING */
