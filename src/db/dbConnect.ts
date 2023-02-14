@@ -33,7 +33,7 @@ async function dbConnect(): Promise<void> {
         await mongoose.connect(mongoConnect.uri, options);
 
         // Ternary to only show the URI if not in PROD since at the moment the URI includes user/pass.
-        process.env.NODE_ENV != NodeEnvironment.PROD
+        process.env.NODE_ENV !== NodeEnvironment.PROD
             ? logger.info(`Connected to MongoDB at url ${mongoConnect.uri}`)
             : logger.info('Connected to MongoDB');
     } catch (e: any) {
